@@ -2,6 +2,8 @@ import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text, Card, Avatar, ListItem } from 'react-native-elements';
 
+const AnyCard: any = Card;
+
 export default function ProfileScreen() {
   const profileData = [
     { title: 'Email', subtitle: 'user@example.com', icon: 'email' },
@@ -12,7 +14,7 @@ export default function ProfileScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      <Card containerStyle={styles.profileCard}>
+  <AnyCard containerStyle={styles.profileCard as any}>
         <View style={styles.avatarContainer}>
           <Avatar
             size="large"
@@ -23,9 +25,9 @@ export default function ProfileScreen() {
           <Text h3 style={styles.name}>John Doe</Text>
           <Text style={styles.bio}>Software Developer</Text>
         </View>
-      </Card>
+  </AnyCard>
 
-      <Card containerStyle={styles.infoCard}>
+  <AnyCard containerStyle={styles.infoCard as any}>
         <Text h4 style={styles.sectionTitle}>Profile Information</Text>
         {profileData.map((item, index) => (
           <ListItem key={index} bottomDivider>
@@ -35,7 +37,7 @@ export default function ProfileScreen() {
             </ListItem.Content>
           </ListItem>
         ))}
-      </Card>
+  </AnyCard>
     </ScrollView>
   );
 }

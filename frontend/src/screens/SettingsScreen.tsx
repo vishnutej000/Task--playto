@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text, Card, ListItem, Switch } from 'react-native-elements';
 
+const AnyCard: any = Card;
+
 export default function SettingsScreen(): React.JSX.Element {
   const [notifications, setNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
@@ -9,7 +11,7 @@ export default function SettingsScreen(): React.JSX.Element {
 
   return (
     <View style={styles.container}>
-      <Card containerStyle={styles.card}>
+  <AnyCard containerStyle={styles.card as any}>
         <Card.Title>Preferences</Card.Title>
         <Card.Divider />
         
@@ -48,9 +50,9 @@ export default function SettingsScreen(): React.JSX.Element {
             color="#3b82f6"
           />
         </ListItem>
-      </Card>
+  </AnyCard>
 
-      <Card containerStyle={styles.card}>
+  <AnyCard containerStyle={styles.card as any}>
         <Card.Title>About</Card.Title>
         <Card.Divider />
         
@@ -74,7 +76,7 @@ export default function SettingsScreen(): React.JSX.Element {
           </ListItem.Content>
           <ListItem.Chevron />
         </ListItem>
-      </Card>
+  </AnyCard>
     </View>
   );
 }

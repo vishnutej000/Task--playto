@@ -265,42 +265,26 @@ interface ChatItem {
 }
 
 const chatData: ChatItem[] = [
-  {
-    id: '1',
-    name: 'Jane',
-    message: 'Jane : Did you have time to see this?',
-    time: '17/02/25',
-    avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=52&h=52&fit=crop&crop=face',
-  },
-  {
-    id: '2',
-    name: 'Evelyn',
-    message: 'You : hi!',
-    time: '10/02/25',
-    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=52&h=52&fit=crop&crop=face',
-  },
-  {
-    id: '3',
-    name: 'Jonathan',
-    message: 'Jonathan : hey, check this pic, its hilarious',
-    time: '30/12/24',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=52&h=52&fit=crop&crop=face',
-    unreadCount: 1,
-  },
-  {
-    id: '4',
-    name: 'Jane',
-    message: 'Jane : Did you have time to see this?',
-    time: '20/11/24',
-    avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=52&h=52&fit=crop&crop=face',
-  },
-  {
-    id: '5',
-    name: 'Evelyn',
-    message: 'You : hi!',
-    time: 'Tuesday',
-    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=52&h=52&fit=crop&crop=face',
-  },
+  { id: '1', name: 'Jane', message: 'Jane: Did you have time to see this?', time: '17/02/25', avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=52&h=52&fit=crop&crop=face', unreadCount: 2 },
+  { id: '2', name: 'Evelyn', message: 'You: hi!', time: '10/02/25', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=52&h=52&fit=crop&crop=face' },
+  { id: '3', name: 'Jonathan', message: 'Jonathan: hey, check this pic, it\'s hilarious', time: '30/12/24', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=52&h=52&fit=crop&crop=face', unreadCount: 1 },
+  { id: '4', name: 'Marcus', message: 'Sent a location', time: '20/11/24', avatar: 'https://images.unsplash.com/photo-1545996124-1f3d4f5b3d4f?w=52&h=52&fit=crop&crop=face' },
+  { id: '5', name: 'Aisha', message: 'Thanks — I\'ll get back to you', time: 'Tue', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=52&h=52&fit=crop&crop=face', unreadCount: 3 },
+  { id: '6', name: 'Liam', message: 'Voice note: 0:12', time: 'Mon', avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=52&h=52&fit=crop&crop=face' },
+  { id: '7', name: 'Noah', message: 'Check this article I found', time: '01/08/24', avatar: 'https://images.unsplash.com/photo-1546456073-6712f79251bb?w=52&h=52&fit=crop&crop=face' },
+  { id: '8', name: 'Olivia', message: 'Can we reschedule?', time: 'Yesterday', avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=52&h=52&fit=crop&crop=face', unreadCount: 1 },
+  { id: '9', name: 'Emma', message: 'Photos from the trip', time: 'Yesterday', avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=52&h=52&fit=crop&crop=face' },
+  { id: '10', name: 'Olga', message: 'Meeting at 3pm', time: '12/07/24', avatar: 'https://images.unsplash.com/photo-1545996124-1f3d4f5b3d4f?w=52&h=52&fit=crop&crop=face' },
+  { id: '11', name: 'Sophia', message: 'Congrats on the launch!', time: '10/07/24', avatar: 'https://images.unsplash.com/photo-1500917293891-ef795e70e1f6?w=52&h=52&fit=crop&crop=face' },
+  { id: '12', name: 'Michael', message: 'Sent you the file', time: '08/07/24', avatar: 'https://images.unsplash.com/photo-1547425260-76bcadfb4f2c?w=52&h=52&fit=crop&crop=face' },
+  { id: '13', name: 'Chloe', message: 'LOL 😂', time: '05/07/24', avatar: 'https://images.unsplash.com/photo-1545996124-1f3d4f5b3d4f?w=52&h=52&fit=crop&crop=face' },
+  { id: '14', name: 'Daniel', message: 'Are you coming tonight?', time: '02/07/24', avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=52&h=52&fit=crop&crop=face', unreadCount: 5 },
+  { id: '15', name: 'Grace', message: 'Thanks for the help!', time: '30/06/24', avatar: 'https://images.unsplash.com/photo-1500917293891-ef795e70e1f6?w=52&h=52&fit=crop&crop=face' },
+  { id: '16', name: 'Ethan', message: 'Let\'s catch up soon', time: '28/06/24', avatar: 'https://images.unsplash.com/photo-1547425260-76bcadfb4f2c?w=52&h=52&fit=crop&crop=face' },
+  { id: '17', name: 'Zara', message: 'Done ✅', time: '26/06/24', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=52&h=52&fit=crop&crop=face' },
+  { id: '18', name: 'Oliver', message: 'Time to deploy', time: '20/06/24', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=52&h=52&fit=crop&crop=face' },
+  { id: '19', name: 'Maya', message: 'Cooking tonight?', time: '18/06/24', avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=52&h=52&fit=crop&crop=face' },
+  { id: '20', name: 'Lucas', message: 'See you soon', time: '15/06/24', avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=52&h=52&fit=crop&crop=face' },
 ];
 
 interface ChatScreenProps {

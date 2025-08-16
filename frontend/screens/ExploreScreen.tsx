@@ -2,6 +2,10 @@ import React from 'react';
 import { View, StyleSheet, ScrollView, FlatList } from 'react-native';
 import { Text, Card, SearchBar, Button } from 'react-native-elements';
 
+// react-native-elements components have strict TS typings in this workspace; create typed-any aliases
+const AnyCard: any = Card;
+const AnySearchBar: any = SearchBar;
+
 export default function ExploreScreen() {
   const [search, setSearch] = React.useState('');
 
@@ -13,7 +17,7 @@ export default function ExploreScreen() {
   ];
 
   const renderExploreItem = ({ item }: any) => (
-    <Card containerStyle={[styles.exploreCard, { borderLeftColor: item.color }]}>
+  <AnyCard containerStyle={[styles.exploreCard, { borderLeftColor: item.color }] as any}>
       <View style={styles.exploreContent}>
         <Text h4 style={styles.exploreTitle}>{item.title}</Text>
         <Text style={styles.exploreDescription}>{item.description}</Text>
@@ -23,14 +27,15 @@ export default function ExploreScreen() {
           onPress={() => console.log(`Exploring ${item.title}`)}
         />
       </View>
-    </Card>
+  </AnyCard>
   );
 
   return (
     <View style={styles.container}>
-      <SearchBar
+  <AnySearchBar
         placeholder="Search for content..."
-        onChangeText={setSearch}
+        platform="default"
+        onChangeText={(text?: string) => setSearch(text ?? '')}
         value={search}
         containerStyle={styles.searchContainer}
         inputContainerStyle={styles.searchInput}

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Button, Text, Card } from 'react-native-elements';
+const AnyCard: any = Card;
 
 interface HomeScreenProps {
   navigation: any;
@@ -9,7 +10,7 @@ interface HomeScreenProps {
 export default function HomeScreen({ navigation }: HomeScreenProps): React.JSX.Element {
   return (
     <View style={styles.container}>
-      <Card containerStyle={styles.card}>
+  <AnyCard containerStyle={styles.card as any}>
         <Card.Title h2 style={styles.title}>
           Welcome to React Native!
         </Card.Title>
@@ -22,16 +23,16 @@ export default function HomeScreen({ navigation }: HomeScreenProps): React.JSX.E
           buttonStyle={styles.button}
           onPress={() => navigation.navigate('Details')}
         />
-      </Card>
+  </AnyCard>
       
-      <Card containerStyle={styles.card}>
+  <AnyCard containerStyle={styles.card as any}>
         <Card.Title h4>Features:</Card.Title>
         <Card.Divider />
         <Text style={styles.feature}>✅ TypeScript support</Text>
         <Text style={styles.feature}>✅ React Native Elements UI</Text>
         <Text style={styles.feature}>✅ Navigation setup</Text>
         <Text style={styles.feature}>✅ Responsive design</Text>
-      </Card>
+  </AnyCard>
     </View>
   );
 }

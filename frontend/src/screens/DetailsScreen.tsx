@@ -2,6 +2,8 @@ import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text, Card, Button } from 'react-native-elements';
 
+const AnyCard: any = Card;
+
 interface DetailsScreenProps {
   navigation: any;
 }
@@ -9,16 +11,16 @@ interface DetailsScreenProps {
 export default function DetailsScreen({ navigation }: DetailsScreenProps): React.JSX.Element {
   return (
     <ScrollView style={styles.container}>
-      <Card containerStyle={styles.card}>
+  <AnyCard containerStyle={styles.card as any}>
         <Card.Title h3>App Details</Card.Title>
         <Card.Divider />
         <Text style={styles.description}>
           This is a React Native application built with TypeScript and React Native Elements. 
           It demonstrates navigation patterns, component styling, and responsive design principles.
         </Text>
-      </Card>
+  </AnyCard>
 
-      <Card containerStyle={styles.card}>
+  <AnyCard containerStyle={styles.card as any}>
         <Card.Title h4>Technical Stack</Card.Title>
         <Card.Divider />
         <View style={styles.techItem}>
@@ -37,9 +39,9 @@ export default function DetailsScreen({ navigation }: DetailsScreenProps): React
           <Text style={styles.techTitle}>Navigation:</Text>
           <Text style={styles.techValue}>React Navigation v7</Text>
         </View>
-      </Card>
+  </AnyCard>
 
-      <Card containerStyle={styles.card}>
+  <AnyCard containerStyle={styles.card as any}>
         <Card.Title h4>Features</Card.Title>
         <Card.Divider />
         <Text style={styles.feature}>🚀 Fast development with Expo</Text>
@@ -47,7 +49,7 @@ export default function DetailsScreen({ navigation }: DetailsScreenProps): React
         <Text style={styles.feature}>🎨 Beautiful UI components</Text>
         <Text style={styles.feature}>🔧 TypeScript for better development</Text>
         <Text style={styles.feature}>📍 Navigation between screens</Text>
-      </Card>
+  </AnyCard>
 
       <Button
         title="Go Back"

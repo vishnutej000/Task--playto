@@ -251,15 +251,21 @@ const ChatConversationScreen = ({ navigation, route }: ChatConversationScreenPro
             )}
 
             {item.type === 'call' && (
-              <View style={styles.callContainer}>
+              <TouchableOpacity
+                style={styles.callContainer}
+                onPress={() => {
+                  const type = item.content && item.content.toLowerCase().includes('voice') ? 'audio' : 'video';
+                  navigation.navigate('Call', { chatName, avatar, callType: type });
+                }}
+              >
                 <View style={styles.callIconContainer}>
-                  <Icon name="call" size={20} color="#007AFF" />
+                  <Icon name={item.content && item.content.toLowerCase().includes('voice') ? 'call' : 'videocam'} size={20} color="#007AFF" />
                 </View>
                 <View style={styles.callInfo}>
                   <Text style={styles.callType}>{item.content}</Text>
                   <Text style={styles.callDuration}>{item.duration}</Text>
                 </View>
-              </View>
+              </TouchableOpacity>
             )}
           </View>
         </View>
@@ -299,10 +305,16 @@ const ChatConversationScreen = ({ navigation, route }: ChatConversationScreenPro
           </View>
 
           <View style={styles.headerActions}>
-            <TouchableOpacity style={styles.actionButton}>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => navigation.navigate('Call', { chatName, avatar, callType: 'video' })}
+            >
               <Icon name="videocam" size={22} color="#007AFF" />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.actionButton}>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => navigation.navigate('Call', { chatName, avatar, callType: 'audio' })}
+            >
               <Icon name="call" size={22} color="#007AFF" />
             </TouchableOpacity>
             <TouchableOpacity style={styles.actionButton}>

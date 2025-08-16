@@ -2,10 +2,12 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text, Button, Card } from 'react-native-elements';
 
+const AnyCard: any = Card;
+
 export default function HomeScreen({ navigation }: any) {
   return (
     <View style={styles.container}>
-      <Card containerStyle={styles.card}>
+  <AnyCard containerStyle={styles.card as any}>
         <Text h2 style={styles.title}>Home Screen</Text>
         <Text style={styles.subtitle}>Welcome to your app!</Text>
         
@@ -20,7 +22,7 @@ export default function HomeScreen({ navigation }: any) {
           buttonStyle={[styles.button, styles.secondaryButton]}
           onPress={() => navigation.navigate('Settings')}
         />
-      </Card>
+  </AnyCard>
     </View>
   );
 }

@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import ChatScreen from './src/screens/ChatScreen';
 import ChatConversationScreen from './src/screens/ChatConversationScreen';
+import CallScreen from './src/screens/CallScreen';
 import ExploreScreen from './screens/ExploreScreen';
 import ProfileScreen from './screens/ProfileScreen';
 
@@ -72,6 +73,7 @@ function RootNavigator() {
     <RootStack.Navigator screenOptions={{ headerShown: false }}>
       <RootStack.Screen name="MainTabs" component={TabNavigator} />
       <RootStack.Screen name="ChatConversation" component={ChatConversationScreen} />
+  <RootStack.Screen name="Call" component={CallScreen} />
     </RootStack.Navigator>
   );
 }

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, Switch } from 'react-native';
 import { Text, Card, ListItem, Button } from 'react-native-elements';
+const AnyCard: any = Card;
 
 export default function SettingsScreen() {
   const [notifications, setNotifications] = useState(true);
@@ -36,7 +37,7 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      <Card containerStyle={styles.card}>
+  <AnyCard containerStyle={styles.card as any}>
         <Text h4 style={styles.sectionTitle}>Preferences</Text>
         {settingsOptions.map((option, index) => (
           <ListItem key={index} bottomDivider>
@@ -52,9 +53,9 @@ export default function SettingsScreen() {
             />
           </ListItem>
         ))}
-      </Card>
+  </AnyCard>
 
-      <Card containerStyle={styles.card}>
+  <AnyCard containerStyle={styles.card as any}>
         <Text h4 style={styles.sectionTitle}>Account</Text>
         {accountOptions.map((option, index) => (
           <ListItem key={index} bottomDivider onPress={() => console.log(`Pressed ${option.title}`)}>
@@ -65,16 +66,16 @@ export default function SettingsScreen() {
             <ListItem.Chevron />
           </ListItem>
         ))}
-      </Card>
+  </AnyCard>
 
-      <Card containerStyle={styles.card}>
+  <AnyCard containerStyle={styles.card as any}>
         <Button
           title="Sign Out"
           buttonStyle={styles.signOutButton}
           titleStyle={styles.signOutText}
           onPress={() => console.log('Sign out pressed')}
         />
-      </Card>
+      </AnyCard>
     </ScrollView>
   );
 }
