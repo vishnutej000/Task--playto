@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
   Platform,
   StatusBar,
   Dimensions,
+  Animated,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -294,6 +295,8 @@ interface ChatScreenProps {
 export default function ChatScreen({ navigation }: ChatScreenProps): React.JSX.Element {
   const [activeTab, setActiveTab] = useState('All');
   const [searchText, setSearchText] = useState('');
+  const [searchFocused, setSearchFocused] = useState(false);
+  const placeholderOpacity = useRef(new Animated.Value(1)).current;
   const insets = useSafeAreaInsets();
   const { width: screenWidth } = Dimensions.get('window');
   
@@ -343,6 +346,16 @@ export default function ChatScreen({ navigation }: ChatScreenProps): React.JSX.E
     </TouchableOpacity>
   );
 
+  // animate placeholder opacity slowly on focus/blur or when text changes
+  useEffect(() => {
+    const toValue = searchText ? 0 : (searchFocused ? 0 : 1);
+    Animated.timing(placeholderOpacity, {
+      toValue,
+      duration: 600,
+      useNativeDriver: true,
+    }).start();
+  }, [searchFocused, searchText, placeholderOpacity]);
+
   // Universal render for both platforms with exact Figma specs
   return (
     <View style={styles.container}>
@@ -374,15 +387,24 @@ export default function ChatScreen({ navigation }: ChatScreenProps): React.JSX.E
             <View style={styles.searchContainer}>
               <View style={styles.inputBox}>
                 <View style={styles.searchIconContainer}>
-                  <View style={styles.searchIconUnion} />
+                  <Ionicons name="search" size={18} color="#6B707B" />
                 </View>
-                <TextInput
-                  style={styles.searchInput}
-                  placeholder="Name"
-                  placeholderTextColor="#6B707B"
-                  value={searchText}
-                  onChangeText={setSearchText}
-                />
+                <View style={[styles.searchInputWrapper, { flex: 1 }]}>
+                  <TextInput
+                    style={styles.searchInput}
+                    placeholder=""
+                    value={searchText}
+                    onChangeText={setSearchText}
+                    onFocus={() => setSearchFocused(true)}
+                    onBlur={() => setSearchFocused(false)}
+                  />
+                  { /* Animated placeholder overlay so we can control opacity speed */ }
+                  {!searchText && (
+                    <Animated.Text pointerEvents="none" style={[styles.searchPlaceholderAbsolute, { opacity: placeholderOpacity }]}>
+                      Name
+                    </Animated.Text>
+                  )}
+                </View>
               </View>
             </View>
 
@@ -539,8 +561,9 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     gap: 10,
     height: 30,
-    borderWidth: 1,
-    borderColor: '#EAEBEC',
+  borderWidth: 1,
+  borderColor: '#EAEBEC',
+  backgroundColor: '#FFFFFF',
     borderRadius: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
@@ -572,6 +595,23 @@ const styles = StyleSheet.create({
   // Chat List
   chatList: {
     flex: 1,
+  },
+  // Animated placeholder overlay for search input
+  searchPlaceholderAbsolute: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    height: 40,
+    lineHeight: 40,
+    color: '#6B707B',
+    fontSize: 16,
+    paddingLeft: 0,
+  },
+  searchInputWrapper: {
+    justifyContent: 'center',
+    position: 'relative',
+    height: 40,
+    paddingLeft: 4,
   },
   // Chat Item
   chatItem: {

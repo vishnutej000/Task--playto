@@ -138,11 +138,48 @@ const CustomSendIcon = ({ size = 18, color = "#FFFFFF" }) => (
   </Svg>
 );
 
+// Custom Audio Call Icon (user-provided SVG)
+const CustomAudioCallIcon = ({ size = 20, color = "#FF8A65" }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M21.97 18.33c0 .36-.08.73-.25 1.09-.17.36-.39.7-.68 1.02-.49.54-1.03.93-1.64 1.18-.6.25-1.25.38-1.95.38-1.02 0-2.11-.24-3.26-.73s-2.3-1.15-3.44-1.98a28.75 28.75 0 0 1-3.28-2.8 28.414 28.414 0 0 1-2.79-3.27c-.82-1.14-1.48-2.28-1.96-3.41C2.24 8.67 2 7.58 2 6.54c0-.68.12-1.33.36-1.93.24-.61.62-1.17 1.15-1.67C4.15 2.31 4.85 2 5.59 2c.28 0 .56.06.81.18.26.12.49.3.67.56l2.32 3.27c.18.25.31.48.4.7.09.21.14.42.14.61 0 .24-.07.48-.21.71-.13.23-.32.47-.56.71l-.76.79c-.11.11-.16.24-.16.4 0 .08.01.15.03.23.03.08.06.14.08.2.18.33.49.76.93 1.28.45.52.93 1.05 1.45 1.58.54.53 1.06 1.02 1.59 1.47.52.44.95.74 1.29.92.05.02.11.05.18.08.08.03.16.04.25.04.17 0 .3-.06.41-.17l.76-.75c.25-.25.49-.44.72-.56.23-.14.46-.21.71-.21.19 0 .39.04.61.13.22.09.45.22.7.39l3.31 2.35c.26.18.44.39.55.64.10.25.16.5.16.78Z"
+      stroke={color}
+      strokeWidth={1.5}
+      strokeMiterlimit={10}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </Svg>
+);
+
+// Custom Video Call Icon (user-provided SVG)
+const CustomVideoCallIcon = ({ size = 20, color = "#FF8A65" }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M12.53 20.42H6.21c-3.16 0-4.21-2.1-4.21-4.21V7.79c0-3.16 1.05-4.21 4.21-4.21h6.32c3.16 0 4.21 1.05 4.21 4.21v8.42c0 3.16-1.06 4.21-4.21 4.21Z"
+      stroke={color}
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <Path
+      d="m19.52 17.1-2.78-1.95V8.84l2.78-1.95c1.36-.95 2.48-.37 2.48 1.3v7.62c0 1.67-1.12 2.25-2.48 1.29ZM11.5 11a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"
+      stroke={color}
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </Svg>
+);
+
 const ChatConversationScreen = ({ navigation, route }: ChatConversationScreenProps) => {
   const HEADER_HEIGHT = 64;
   const [headerTransparent, setHeaderTransparent] = useState(false);
   const [messageText, setMessageText] = useState('');
   const [isRecording, setIsRecording] = useState(false);
+  const [recordingHeights, setRecordingHeights] = useState<number[]>(() => Array.from({ length: 24 }, () => 8));
+  const recordingIntervalRef = useRef<any>(null);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
   const insets = useSafeAreaInsets();
   const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
   const scrollViewRef = useRef<ScrollView>(null);
@@ -182,6 +219,33 @@ const ChatConversationScreen = ({ navigation, route }: ChatConversationScreenPro
     setIsRecording(!isRecording);
   };
 
+  // start/stop simulated waveform when recording toggles
+  useEffect(() => {
+    if (isRecording) {
+      // reset timer and heights
+      setRecordingSeconds(0);
+      setRecordingHeights(Array.from({ length: 20 }, () => 8));
+      recordingIntervalRef.current = setInterval(() => {
+        // update heights with random variation to simulate live waveform
+        setRecordingHeights((prev) => Array.from({ length: 24 }, () => 6 + Math.round(Math.random() * 22)));
+        setRecordingSeconds((s) => s + 1);
+      }, 250);
+    } else {
+      if (recordingIntervalRef.current) {
+        clearInterval(recordingIntervalRef.current);
+        recordingIntervalRef.current = null;
+      }
+      setRecordingSeconds(0);
+    }
+
+    return () => {
+      if (recordingIntervalRef.current) {
+        clearInterval(recordingIntervalRef.current);
+        recordingIntervalRef.current = null;
+      }
+    };
+  }, [isRecording]);
+
   const renderMessage = ({ item }: { item: Message }) => {
   const isMe = item.sender === 'me';
     // Make file messages wider horizontally than regular text bubbles
@@ -200,21 +264,6 @@ const ChatConversationScreen = ({ navigation, route }: ChatConversationScreenPro
             )}
 
             {item.type === 'image' && (
-              <View>
-                <Image
-                  source={{ uri: item.imageUrl }}
-                  style={[styles.messageImage, { width: Math.min(maxBubbleWidth - 24, 280) }]}
-                  resizeMode="cover"
-                />
-                {item.content && (
-                  <Text style={[styles.messageText, isMe ? styles.myMessageText : styles.otherMessageText, { marginTop: 8 }]}>
-                    {item.content}
-                  </Text>
-                )}
-              </View>
-            )}
-
-            {item.type === 'video' && (
               <View>
                 <View style={styles.videoContainer}>
                   <Image
@@ -284,11 +333,15 @@ const ChatConversationScreen = ({ navigation, route }: ChatConversationScreenPro
                 style={styles.callContainer}
                 onPress={() => {
                   const type = item.content && item.content.toLowerCase().includes('voice') ? 'audio' : 'video';
-                  navigation.navigate('Call', { chatName, avatar, callType: type });
+                  navigation.navigate('Call', { chatName, avatar, callType: type, topInset });
                 }}
               >
                 <View style={styles.callIconContainer}>
-                  <Icon name={item.content && item.content.toLowerCase().includes('voice') ? 'call' : 'videocam'} size={20} color="#007AFF" />
+                  {item.content && item.content.toLowerCase().includes('voice') ? (
+                    <CustomAudioCallIcon size={20} color="#007AFF" />
+                  ) : (
+                    <CustomVideoCallIcon size={20} color="#007AFF" />
+                  )}
                 </View>
                 <View style={styles.callInfo}>
                   <Text style={styles.callType}>{item.content}</Text>
@@ -309,8 +362,9 @@ const ChatConversationScreen = ({ navigation, route }: ChatConversationScreenPro
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={isIOS ? 'padding' : 'height'}
-      keyboardVerticalOffset={isIOS ? 0 : 20}
+      // use padding behavior on both platforms so the input lifts above the keyboard
+      behavior={'padding'}
+      keyboardVerticalOffset={0}
     >
   <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent={true} />
 
@@ -331,28 +385,40 @@ const ChatConversationScreen = ({ navigation, route }: ChatConversationScreenPro
               resizeMode="cover"
             />
             <Text style={styles.headerName}>{chatName}</Text>
-          </View>
-
+           </View>
+ 
           <View style={styles.headerActions}>
+            {/* render order: video, audio, kebab -> visually right-to-left: kebab, audio, video */}
             <TouchableOpacity
               style={styles.actionButton}
-              onPress={() => navigation.navigate('Call', { chatName, avatar, callType: 'video' })}
+              onPress={() => navigation.navigate('Call', { chatName, avatar, callType: 'video', topInset })}
+              accessibilityRole="button"
+              accessibilityLabel="Start video call"
             >
-              <Icon name="videocam" size={22} color="#007AFF" />
+              <CustomVideoCallIcon size={24} color="#007AFF" />
             </TouchableOpacity>
+
             <TouchableOpacity
               style={styles.actionButton}
-              onPress={() => navigation.navigate('Call', { chatName, avatar, callType: 'audio' })}
+              onPress={() => navigation.navigate('Call', { chatName, avatar, callType: 'audio', topInset })}
+              accessibilityRole="button"
+              accessibilityLabel="Start audio call"
             >
-              <Icon name="call" size={22} color="#007AFF" />
+              <CustomAudioCallIcon size={24} color="#007AFF" />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.actionButton}>
-              <Icon name="ellipsis-vertical" size={18} color="#007AFF" />
+
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => { /* TODO: open menu */ }}
+              accessibilityRole="button"
+              accessibilityLabel="More options"
+            >
+              <Icon name="ellipsis-vertical" size={24} color="#007AFF" />
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Messages - pad the top so content is visible under the absolute header */}
+          {/* Messages - pad the top so content is visible under the absolute header */}
         <ScrollView
           ref={scrollViewRef}
           style={styles.messagesContainer}
@@ -374,8 +440,9 @@ const ChatConversationScreen = ({ navigation, route }: ChatConversationScreenPro
         </ScrollView>
 
         {/* Input Area */}
-        <View style={[styles.inputContainer, { paddingBottom: isIOS ? insets.bottom + 8 : 16 }]}>
-          <View style={styles.inputBox}>
+        {/* Floating input: use same floating styles on Android as iOS */}
+        <View style={[styles.inputContainer, styles.inputContainerIOS, { paddingBottom: insets.bottom + 8 }]}>
+          <View style={[styles.inputBox, styles.inputBoxIOS]}>
             <TouchableOpacity
               style={styles.addButton}
               hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
@@ -385,15 +452,55 @@ const ChatConversationScreen = ({ navigation, route }: ChatConversationScreenPro
               <Icon name="add" size={24} color="#007AFF" />
             </TouchableOpacity>
 
-            <TextInput
-              style={styles.textInput}
-              placeholder="Type message..."
-              placeholderTextColor="#999999"
-              value={messageText}
-              onChangeText={setMessageText}
-              multiline
-              maxLength={1000}
-            />
+            {isRecording ? (
+              <View style={styles.recordingContainer}>
+                <View style={styles.recordingInner}>
+                  <View style={styles.recordingMicWrapper}>
+                    <CustomMicIcon size={18} color="#007AFF" />
+                  </View>
+
+                  <View style={styles.recordingBars}>
+                    {recordingHeights.map((h, i) => {
+                      const activeCount = 3; // first N bars are animated blue
+                      if (i < activeCount) {
+                        return (
+                          <View
+                            key={i}
+                            style={[
+                              styles.recordingBar,
+                              { height: h, backgroundColor: '#007AFF', width: 4, marginRight: 4 },
+                            ]}
+                          />
+                        );
+                      }
+
+                      // grey dotted small markers for the rest
+                      return (
+                        <View
+                          key={i}
+                          style={[
+                            styles.recordingDot,
+                            { height: 6, width: 3, marginRight: 4, backgroundColor: 'rgba(142,142,147,0.4)' },
+                          ]}
+                        />
+                      );
+                    })}
+                  </View>
+
+                  <Text style={styles.recordingTimer}>{new Date(recordingSeconds * 1000).toISOString().substr(14, 5)}</Text>
+                </View>
+              </View>
+            ) : (
+              <TextInput
+                style={[styles.textInput, styles.textInputIOS]}
+                placeholder="Type message..."
+                placeholderTextColor="#999999"
+                value={messageText}
+                onChangeText={setMessageText}
+                multiline
+                maxLength={1000}
+              />
+            )}
 
             <TouchableOpacity
               style={styles.micButton}
@@ -437,6 +544,7 @@ const styles = StyleSheet.create({
   left: 0,
   right: 0,
   paddingVertical: 12,
+  paddingHorizontal: 12,
   // keep header visually flat: no shadow or border
   backgroundColor: 'rgba(255,255,255,0.0)',
   borderBottomWidth: 0,
@@ -466,10 +574,13 @@ const styles = StyleSheet.create({
   headerActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
+    justifyContent: 'flex-end',
+    // small right margin so buttons don't touch the screen edge
+    marginRight: 8,
   },
   actionButton: {
-    padding: 4,
+  padding: 6,
+  marginHorizontal: 4,
   },
   messagesContainer: {
     flex: 1,
@@ -644,7 +755,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#34C759',
+  backgroundColor: '#007AFF',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -690,6 +801,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     minHeight: 40,
+  },
+  inputContainerIOS: {
+    backgroundColor: 'transparent',
+    paddingHorizontal: 12,
+    paddingTop: 6,
+  },
+  inputBoxIOS: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 8,
+    alignItems: 'center',
   },
   fileStackContainer: {
     width: '100%',
@@ -763,6 +891,10 @@ const styles = StyleSheet.create({
     maxHeight: 100,
     textAlignVertical: 'center',
   },
+  textInputIOS: {
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+  },
   micButton: {
   marginLeft: 8,
   padding: 8,
@@ -775,6 +907,49 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginLeft: 8,
+  },
+  recordingContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 6,
+  },
+  recordingBars: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginRight: 12,
+    height: 36,
+  },
+  recordingInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+  },
+  recordingMicWrapper: {
+    width: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  recordingBar: {
+    width: 4,
+    borderRadius: 2,
+    backgroundColor: '#FF3B30',
+  },
+  recordingDot: {
+    width: 3,
+    borderRadius: 2,
+  },
+  recordingTimer: {
+    minWidth: 48,
+    textAlign: 'right',
+    color: '#8E8E93',
+    fontSize: 14,
   },
 });
 
