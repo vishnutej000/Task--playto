@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,209 +10,14 @@ import {
   SafeAreaView,
   Platform,
   Dimensions,
-  FlatList,
+  KeyboardAvoidingView,
+  StatusBar,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 type MessageType = 'text' | 'image' | 'video' | 'audio' | 'file' | 'call';
 type SenderType = 'me' | 'other';
-
-// Custom Status Bar Component
-const CustomStatusBar = () => (
-  <View style={statusBarStyles.statusBarFrame}>
-    <View style={statusBarStyles.statusBar}>
-      {/* Time */}
-      <Text style={statusBarStyles.time}>9:41</Text>
-
-      {/* Dynamic Island */}
-      <View style={statusBarStyles.dynamicIslandGroup}>
-        <View style={statusBarStyles.dynamicIsland}>
-          <View style={statusBarStyles.lens}>
-            <View style={statusBarStyles.lensInner1} />
-            <View style={statusBarStyles.lensInner2} />
-            <View style={statusBarStyles.lensInner3} />
-            <View style={statusBarStyles.lensInner4} />
-          </View>
-        </View>
-      </View>
-
-      {/* Right Side Icons */}
-      <View style={statusBarStyles.rightSide}>
-        {/* Mobile Signal */}
-        <View style={statusBarStyles.mobileSignal} />
-
-        {/* WiFi */}
-        <View style={statusBarStyles.wifi}>
-          <View style={statusBarStyles.wifiPath1} />
-          <View style={statusBarStyles.wifiPath2} />
-          <View style={statusBarStyles.wifiPath3} />
-        </View>
-
-        {/* Battery */}
-        <View style={statusBarStyles.battery}>
-          <View style={statusBarStyles.batteryOutline}>
-            <View style={statusBarStyles.batteryFill} />
-          </View>
-          <View style={statusBarStyles.batteryEnd} />
-        </View>
-      </View>
-    </View>
-  </View>
-);
-
-const statusBarStyles = StyleSheet.create({
-  statusBarFrame: {
-    width: '100%',
-    height: 100,
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    zIndex: 1000,
-  },
-  statusBar: {
-    width: '100%',
-    height: 48,
-    backgroundColor: '#FDFDFD',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 24,
-  },
-  time: {
-    fontFamily: 'Inter',
-    fontWeight: '600',
-    fontSize: 16,
-    lineHeight: 21,
-    textAlign: 'center',
-    letterSpacing: -0.32,
-    color: '#121212',
-  },
-  dynamicIslandGroup: {
-    position: 'absolute',
-    width: 124,
-    height: 37,
-    left: '50%',
-    marginLeft: -62,
-    bottom: -1,
-  },
-  dynamicIsland: {
-    position: 'absolute',
-    width: 124,
-    height: 37,
-    left: '50%',
-    marginLeft: -62,
-    top: 12,
-    backgroundColor: '#171717',
-    borderRadius: 32,
-  },
-  lens: {
-    position: 'absolute',
-    width: 11,
-    height: 11,
-    left: '50%',
-    marginLeft: -5.5,
-    top: '50%',
-    marginTop: -5.5,
-  },
-  lensInner1: {
-    position: 'absolute',
-    width: 11,
-    height: 11,
-    backgroundColor: '#000000',
-    borderRadius: 5.5,
-  },
-  lensInner2: {
-    position: 'absolute',
-    width: 9,
-    height: 9,
-    left: 1,
-    top: 1,
-    backgroundColor: '#000000',
-    borderRadius: 4.5,
-  },
-  lensInner3: {
-    position: 'absolute',
-    width: 5,
-    height: 2,
-    left: 3,
-    top: 2,
-    backgroundColor: '#000000',
-  },
-  lensInner4: {
-    position: 'absolute',
-    width: 5,
-    height: 3,
-    left: 3,
-    top: 6,
-    backgroundColor: '#000000',
-  },
-  rightSide: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  mobileSignal: {
-    width: 17.91,
-    height: 12,
-    backgroundColor: '#121212',
-  },
-  wifi: {
-    width: 16.91,
-    height: 12,
-    position: 'relative',
-  },
-  wifiPath1: {
-    position: 'absolute',
-    width: 16.91,
-    height: 5.39,
-    top: 0,
-    backgroundColor: '#DADADA',
-  },
-  wifiPath2: {
-    position: 'absolute',
-    width: 11.02,
-    height: 4.13,
-    top: 4,
-    left: 2.95,
-    backgroundColor: '#DADADA',
-  },
-  wifiPath3: {
-    position: 'absolute',
-    width: 5.12,
-    height: 3.83,
-    top: 8,
-    left: 5.9,
-    backgroundColor: '#DADADA',
-  },
-  battery: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  batteryOutline: {
-    width: 25.26,
-    height: 13,
-    borderWidth: 1,
-    borderColor: '#121212',
-    borderRadius: 4,
-    opacity: 0.35,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  batteryFill: {
-    width: 19.26,
-    height: 9,
-    backgroundColor: '#121212',
-    borderRadius: 2,
-  },
-  batteryEnd: {
-    width: 1.4,
-    height: 4.22,
-    backgroundColor: '#121212',
-    opacity: 0.4,
-    marginLeft: 1,
-  },
-});
 
 interface Message {
   id: string;
@@ -268,14 +73,6 @@ const messages: Message[] = [
   },
   {
     id: '6',
-    type: 'audio',
-    content: '',
-    sender: 'me',
-    timestamp: '12:31 AM',
-    duration: '0:12',
-  },
-  {
-    id: '7',
     type: 'image',
     content: '',
     sender: 'me',
@@ -283,7 +80,7 @@ const messages: Message[] = [
     imageUrl: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=272&h=108&fit=crop',
   },
   {
-    id: '8',
+    id: '7',
     type: 'file',
     content: 'This is the file you wanted',
     sender: 'me',
@@ -292,7 +89,7 @@ const messages: Message[] = [
     fileType: 'File type',
   },
   {
-    id: '9',
+    id: '8',
     type: 'file',
     content: 'This is the file you wanted',
     sender: 'other',
@@ -301,7 +98,7 @@ const messages: Message[] = [
     fileType: 'File type',
   },
   {
-    id: '10',
+    id: '9',
     type: 'call',
     content: 'Voice Call',
     sender: 'me',
@@ -317,16 +114,28 @@ interface ChatConversationScreenProps {
 
 const ChatConversationScreen = ({ navigation, route }: ChatConversationScreenProps) => {
   const [messageText, setMessageText] = useState('');
+  const [isRecording, setIsRecording] = useState(false);
   const insets = useSafeAreaInsets();
-  const { width: screenWidth } = Dimensions.get('window');
+  const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
   const scrollViewRef = useRef<ScrollView>(null);
 
   const isIOS = Platform.OS === 'ios';
-  const responsivePadding = screenWidth < 375 ? 16 : screenWidth > 414 ? 32 : 24;
+  const isSmallScreen = screenWidth < 375;
+  const isLargeScreen = screenWidth > 414;
+  const responsivePadding = isSmallScreen ? 12 : isLargeScreen ? 20 : 16;
+
   const { chatName, avatar } = route.params || {
     chatName: 'Jonathan',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop&crop=face'
   };
+
+  useEffect(() => {
+    // Set status bar style
+    StatusBar.setBarStyle('dark-content', true);
+    if (Platform.OS === 'android') {
+      StatusBar.setBackgroundColor('#FFFFFF', true);
+    }
+  }, []);
 
   const handleSendMessage = () => {
     if (messageText.trim()) {
@@ -336,112 +145,122 @@ const ChatConversationScreen = ({ navigation, route }: ChatConversationScreenPro
     }
   };
 
+  const toggleRecording = () => {
+    setIsRecording(!isRecording);
+  };
+
   const renderMessage = ({ item }: { item: Message }) => {
     const isMe = item.sender === 'me';
-    const messageStyles = isMe ? styles.myMessage : styles.otherMessage;
-    const bubbleStyles = isMe ? styles.myBubble : styles.otherBubble;
-    const textStyles = isMe ? styles.myMessageText : styles.otherMessageText;
+    const maxBubbleWidth = screenWidth * 0.75;
 
     return (
-      <View key={item.id} style={styles.messageWrapper}>
-        <View style={[styles.messageContainer, messageStyles]}>
+      <View style={styles.messageWrapper}>
+        <View style={[styles.messageContainer, isMe ? styles.myMessage : styles.otherMessage]}>
           {!isMe && (
             <Image source={{ uri: avatar }} style={styles.messageAvatar} />
           )}
 
-          <View style={styles.messageContent}>
-            <View style={[styles.messageBubble, bubbleStyles]}>
-              {item.type === 'text' && (
-                <Text style={textStyles}>{item.content}</Text>
-              )}
+          <View style={[styles.messageBubble, isMe ? styles.myBubble : styles.otherBubble, { maxWidth: maxBubbleWidth }]}>
+            {item.type === 'text' && (
+              <Text style={[styles.messageText, isMe ? styles.myMessageText : styles.otherMessageText]}>
+                {item.content}
+              </Text>
+            )}
 
-              {item.type === 'image' && (
-                <View>
+            {item.type === 'image' && (
+              <View>
+                <Image
+                  source={{ uri: item.imageUrl }}
+                  style={[styles.messageImage, { width: Math.min(maxBubbleWidth - 24, 280) }]}
+                  resizeMode="cover"
+                />
+                {item.content && (
+                  <Text style={[styles.messageText, isMe ? styles.myMessageText : styles.otherMessageText, { marginTop: 8 }]}>
+                    {item.content}
+                  </Text>
+                )}
+              </View>
+            )}
+
+            {item.type === 'video' && (
+              <View>
+                <View style={styles.videoContainer}>
                   <Image
                     source={{ uri: item.imageUrl }}
-                    style={styles.messageImage}
+                    style={[styles.messageImage, { width: Math.min(maxBubbleWidth - 24, 280) }]}
                     resizeMode="cover"
                   />
-                  {item.content && (
-                    <Text style={[textStyles, { marginTop: 4 }]}>
-                      {item.content}
-                    </Text>
-                  )}
+                  <View style={styles.videoOverlay}>
+                    <View style={styles.playButton}>
+                      <Icon name="play" size={24} color="#FFFFFF" />
+                    </View>
+                  </View>
+                  <View style={styles.videoDurationContainer}>
+                    <Text style={styles.videoDuration}>{item.duration}</Text>
+                  </View>
                 </View>
-              )}
+                {item.content && (
+                  <Text style={[styles.messageText, isMe ? styles.myMessageText : styles.otherMessageText, { marginTop: 8 }]}>
+                    {item.content}
+                  </Text>
+                )}
+              </View>
+            )}
 
-              {item.type === 'video' && (
-                <View>
-                  <View style={styles.videoContainer}>
-                    <Image
-                      source={{ uri: item.imageUrl }}
-                      style={styles.messageImage}
-                      resizeMode="cover"
+            {item.type === 'audio' && (
+              <View style={styles.audioContainer}>
+                <TouchableOpacity style={styles.audioPlayButton}>
+                  <Icon name="play" size={16} color="#FFFFFF" />
+                </TouchableOpacity>
+                <View style={styles.audioWaveform}>
+                  {Array.from({ length: 20 }, (_, i) => (
+                    <View
+                      key={i}
+                      style={[
+                        styles.audioBar,
+                        {
+                          height: [4, 8, 12, 16, 20, 16, 12, 8, 4, 8, 12, 16, 20, 16, 12, 8, 4, 8, 12, 16][i] || 8,
+                          backgroundColor: i < 6 ? '#FFFFFF' : 'rgba(255, 255, 255, 0.4)',
+                        },
+                      ]}
                     />
-                    <View style={styles.videoOverlay}>
-                      <Ionicons name="play" size={36} color="#FFFFFF" />
-                    </View>
-                    <View style={styles.videoDurationContainer}>
-                      <Text style={styles.videoDuration}>{item.duration}</Text>
-                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {item.type === 'file' && (
+              <View>
+                <View style={[styles.fileContainer, isMe ? styles.myFileContainer : styles.otherFileContainer]}>
+                  <View style={styles.fileIconContainer}>
+                    <Icon name="document-attach" size={20} color="#007AFF" />
                   </View>
-                  {item.content && (
-                    <Text style={[textStyles, { marginTop: 4 }]}>
-                      {item.content}
+                  <View style={styles.fileInfo}>
+                    <Text style={styles.fileName}>File Name</Text>
+                    <Text style={styles.fileDetails}>
+                      {item.fileSize} | {item.fileType}
                     </Text>
-                  )}
-                </View>
-              )}
-
-              {item.type === 'audio' && (
-                <View style={styles.audioContainer}>
-                  <Ionicons name="play" size={24} color="#FFFFFF" />
-                  <View style={styles.audioWaveform}>
-                    {Array.from({ length: 24 }, (_, i) => (
-                      <View
-                        key={i}
-                        style={[
-                          styles.audioBar,
-                          {
-                            height: [32, 27, 23, 23, 23, 23, 27, 27, 27, 32, 32, 25, 25, 25, 18, 18, 11, 18, 23, 32, 32, 19, 15, 9][i] || 15,
-                            backgroundColor: i < 3 ? '#FFFFFF' : '#84A6DB',
-                          },
-                        ]}
-                      />
-                    ))}
                   </View>
                 </View>
-              )}
+                {item.content && (
+                  <Text style={[styles.messageText, isMe ? styles.myMessageText : styles.otherMessageText, { marginTop: 8 }]}>
+                    {item.content}
+                  </Text>
+                )}
+              </View>
+            )}
 
-              {item.type === 'file' && (
-                <View>
-                  <View style={[styles.fileContainer, isMe ? styles.myFileContainer : styles.otherFileContainer]}>
-                    <Ionicons name="attach" size={20} color="#0070C9" />
-                    <View style={styles.fileInfo}>
-                      <Text style={styles.fileName}>File Name</Text>
-                      <Text style={styles.fileDetails}>
-                        {item.fileSize} | {item.fileType}
-                      </Text>
-                    </View>
-                  </View>
-                  {item.content && (
-                    <Text style={[textStyles, { marginTop: 4 }]}>
-                      {item.content}
-                    </Text>
-                  )}
+            {item.type === 'call' && (
+              <View style={styles.callContainer}>
+                <View style={styles.callIconContainer}>
+                  <Icon name="call" size={20} color="#007AFF" />
                 </View>
-              )}
-
-              {item.type === 'call' && (
-                <View style={[styles.callContainer, isMe ? styles.myCallContainer : styles.otherCallContainer]}>
-                  <Ionicons name="call" size={20} color="#0070C9" />
-                  <View style={styles.callInfo}>
-                    <Text style={styles.callType}>{item.content}</Text>
-                    <Text style={styles.callDuration}>{item.duration}</Text>
-                  </View>
+                <View style={styles.callInfo}>
+                  <Text style={styles.callType}>{item.content}</Text>
+                  <Text style={styles.callDuration}>{item.duration}</Text>
                 </View>
-              )}
-            </View>
+              </View>
+            )}
           </View>
         </View>
 
@@ -453,40 +272,41 @@ const ChatConversationScreen = ({ navigation, route }: ChatConversationScreenPro
   };
 
   return (
-    <View style={styles.container}>
-      {/* Custom Status Bar */}
-      <CustomStatusBar />
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={isIOS ? 'padding' : 'height'}
+      keyboardVerticalOffset={isIOS ? 0 : 20}
+    >
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" translucent={false} />
 
       <SafeAreaView style={styles.safeArea}>
         {/* Header */}
-        <View style={[styles.header, { paddingHorizontal: responsivePadding }]}>
+        <View style={styles.header}>
           <View style={styles.headerLeft}>
             <TouchableOpacity
               onPress={() => navigation.goBack()}
               style={styles.backButton}
-              hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
             >
-              <Ionicons name="arrow-back" size={24} color="#0070C9" />
+              <Icon name="arrow-back" size={24} color="#007AFF" />
             </TouchableOpacity>
-            <View style={styles.headerInfo}>
-              <Image
-                source={{ uri: avatar }}
-                style={styles.headerAvatar}
-                resizeMode="cover"
-              />
-              <Text style={styles.headerName}>{chatName}</Text>
-            </View>
+            <Image
+              source={{ uri: avatar }}
+              style={styles.headerAvatar}
+              resizeMode="cover"
+            />
+            <Text style={styles.headerName}>{chatName}</Text>
           </View>
 
           <View style={styles.headerActions}>
             <TouchableOpacity style={styles.actionButton}>
-              <Ionicons name="videocam" size={20} color="#0070C9" />
+              <Icon name="videocam" size={22} color="#007AFF" />
             </TouchableOpacity>
             <TouchableOpacity style={styles.actionButton}>
-              <Ionicons name="call" size={20} color="#0070C9" />
+              <Icon name="call" size={22} color="#007AFF" />
             </TouchableOpacity>
             <TouchableOpacity style={styles.actionButton}>
-              <Ionicons name="ellipsis-vertical" size={16} color="#0070C9" />
+              <Icon name="ellipsis-vertical" size={18} color="#007AFF" />
             </TouchableOpacity>
           </View>
         </View>
@@ -494,92 +314,78 @@ const ChatConversationScreen = ({ navigation, route }: ChatConversationScreenPro
         {/* Messages */}
         <ScrollView
           ref={scrollViewRef}
-          style={[styles.messagesContainer, { paddingHorizontal: responsivePadding }]}
+          style={styles.messagesContainer}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 20 }}
+          contentContainerStyle={styles.messagesContent}
           onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
         >
-          <TouchableOpacity style={styles.todayButton}>
-            <Text style={styles.todayText}>Today</Text>
-          </TouchableOpacity>
-
-          <FlatList
-            data={messages}
-            renderItem={renderMessage}
-            keyExtractor={(item) => item.id}
-            scrollEnabled={false}
-            ListFooterComponent={
-              <TouchableOpacity style={styles.todayButton}>
-                <Text style={styles.todayText}>Today</Text>
-              </TouchableOpacity>
-            }
-          />
+          {messages.map((item) => (
+            <React.Fragment key={item.id}>
+              {renderMessage({ item })}
+            </React.Fragment>
+          ))}
         </ScrollView>
 
         {/* Input Area */}
-        <View style={[styles.inputContainer, {
-          paddingHorizontal: responsivePadding,
-          paddingBottom: isIOS ? insets.bottom : 12
-        }]}>
+        <View style={[styles.inputContainer, { paddingBottom: isIOS ? insets.bottom + 8 : 16 }]}>
           <View style={styles.inputBox}>
-            <View style={styles.inputLeft}>
-              <TouchableOpacity>
-                <Ionicons name="add" size={20} color="#0070C9" />
-              </TouchableOpacity>
-              <TextInput
-                style={styles.textInput}
-                placeholder="Type message..."
-                placeholderTextColor="#6B707B"
-                value={messageText}
-                onChangeText={setMessageText}
-                multiline
-                onSubmitEditing={handleSendMessage}
-              />
-            </View>
+            <TouchableOpacity style={styles.addButton}>
+              <Icon name="add" size={22} color="#007AFF" />
+            </TouchableOpacity>
 
-            <View style={styles.inputRight}>
-              <TouchableOpacity>
-                <Ionicons name="mic" size={20} color="#0070C9" />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.sendButton}
-                onPress={handleSendMessage}
-                disabled={!messageText.trim()}
-              >
-                <Ionicons
-                  name="send"
-                  size={16}
-                  color={messageText.trim() ? "#FFFFFF" : "#CBCED2"}
-                />
-              </TouchableOpacity>
-            </View>
+            <TextInput
+              style={styles.textInput}
+              placeholder="Type message..."
+              placeholderTextColor="#999999"
+              value={messageText}
+              onChangeText={setMessageText}
+              multiline
+              maxLength={1000}
+            />
+
+            <TouchableOpacity
+              style={styles.micButton}
+              onPress={toggleRecording}
+            >
+              <Icon
+                name={isRecording ? "stop" : "mic"}
+                size={20}
+                color="#007AFF"
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.sendButton, { opacity: messageText.trim() ? 1 : 0.6 }]}
+              onPress={handleSendMessage}
+              disabled={!messageText.trim()}
+            >
+              <Icon name="send" size={18} color="#FFFFFF" />
+            </TouchableOpacity>
           </View>
         </View>
       </SafeAreaView>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FDFDFD',
-    paddingTop: 100,
-  },
-  statusBarBackground: {
-    backgroundColor: '#FDFDFD',
+    backgroundColor: '#F2F2F7',
   },
   safeArea: {
     flex: 1,
+    backgroundColor: '#FFFFFF',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#FDFDFD',
-    borderBottomWidth: 1,
-    borderBottomColor: '#EAEBEC',
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#C6C6C8',
   },
   headerLeft: {
     flexDirection: 'row',
@@ -588,62 +394,43 @@ const styles = StyleSheet.create({
   },
   backButton: {
     marginRight: 12,
-  },
-  headerInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    padding: 4,
   },
   headerAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    marginRight: 8,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    marginRight: 12,
   },
   headerName: {
-    fontFamily: 'Geist',
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '600',
-    color: '#20242E',
+    color: '#000000',
   },
   headerActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 16,
   },
   actionButton: {
     padding: 4,
   },
   messagesContainer: {
     flex: 1,
-    paddingTop: 12,
+    backgroundColor: '#F2F2F7',
   },
-  todayButton: {
-    alignSelf: 'center',
-    backgroundColor: '#F9FAFA',
-    borderWidth: 1,
-    borderColor: '#EAEBEC',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginVertical: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  todayText: {
-    fontFamily: 'Geist',
-    fontSize: 12,
-    color: '#20242E',
+  messagesContent: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    paddingBottom: 20,
   },
   messageWrapper: {
-    marginBottom: 12,
+    marginBottom: 16,
   },
   messageContainer: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    gap: 12,
+    marginBottom: 4,
   },
   myMessage: {
     justifyContent: 'flex-end',
@@ -655,49 +442,46 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-  },
-  messageContent: {
-    flex: 1,
+    marginRight: 8,
+    marginBottom: 2,
   },
   messageBubble: {
-    maxWidth: '80%',
     padding: 12,
+    borderRadius: 18,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
-    shadowRadius: 12,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   myBubble: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    borderTopRightRadius: 4,
+    backgroundColor: '#007AFF',
+    borderBottomRightRadius: 6,
     alignSelf: 'flex-end',
   },
   otherBubble: {
-    backgroundColor: '#0070C9',
-    borderRadius: 16,
-    borderTopLeftRadius: 4,
+    backgroundColor: '#E9E9EB',
+    borderBottomLeftRadius: 6,
     alignSelf: 'flex-start',
   },
   messageText: {
-    fontFamily: 'Geist',
     fontSize: 16,
-    lineHeight: 19,
+    lineHeight: 20,
   },
   myMessageText: {
-    color: '#20242E',
-  },
-  otherMessageText: {
     color: '#FFFFFF',
   },
+  otherMessageText: {
+    color: '#000000',
+  },
   messageImage: {
-    width: 272,
-    height: 363,
-    borderRadius: 8,
+    borderRadius: 12,
+    height: 200,
   },
   videoContainer: {
     position: 'relative',
+    borderRadius: 12,
+    overflow: 'hidden',
   },
   videoOverlay: {
     position: 'absolute',
@@ -708,168 +492,174 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    borderRadius: 8,
+  },
+  playButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   videoDurationContainer: {
     position: 'absolute',
     bottom: 8,
     left: 8,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
   },
   videoDuration: {
-    color: '#CBCED2',
+    color: '#FFFFFF',
     fontSize: 12,
-    fontFamily: 'Geist',
+    fontWeight: '500',
   },
   audioContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
     paddingVertical: 8,
-    minHeight: 48,
+    minWidth: 200,
+  },
+  audioPlayButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
   },
   audioWaveform: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 2,
     flex: 1,
   },
   audioBar: {
-    width: 4,
-    borderRadius: 12,
+    width: 3,
+    borderRadius: 1.5,
   },
   fileContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F9FAFA',
-    borderWidth: 1,
-    borderColor: '#EAEBEC',
-    borderRadius: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    gap: 8,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 12,
+    minWidth: 200,
   },
   myFileContainer: {
-    backgroundColor: '#F9FAFA',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
   },
   otherFileContainer: {
-    backgroundColor: '#F9FAFA',
+    backgroundColor: '#FFFFFF',
+  },
+  fileIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#F2F2F7',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
   },
   fileInfo: {
     flex: 1,
   },
   fileName: {
-    fontFamily: 'Geist',
-    fontSize: 15,
-    color: '#20242E',
-    marginBottom: 1,
-    lineHeight: 18,
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#000000',
+    marginBottom: 2,
   },
   fileDetails: {
-    fontFamily: 'Geist',
-    fontSize: 11,
-    color: '#6B707B',
-    lineHeight: 13,
+    fontSize: 13,
+    color: '#8E8E93',
   },
   callContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F9FAFA',
-    borderWidth: 1,
-    borderColor: '#EAEBEC',
-    borderRadius: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    gap: 8,
+    backgroundColor: '#F2F2F7',
+    borderRadius: 12,
+    padding: 12,
+    minWidth: 150,
   },
-  myCallContainer: {
-    backgroundColor: '#F9FAFA',
-  },
-  otherCallContainer: {
-    backgroundColor: '#F9FAFA',
+  callIconContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#34C759',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
   },
   callInfo: {
     flex: 1,
   },
   callType: {
-    fontFamily: 'Geist',
-    fontSize: 15,
-    color: '#20242E',
-    marginBottom: 1,
-    lineHeight: 18,
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#000000',
+    marginBottom: 2,
   },
   callDuration: {
-    fontFamily: 'Geist',
-    fontSize: 11,
-    color: '#6B707B',
-    lineHeight: 13,
+    fontSize: 13,
+    color: '#8E8E93',
   },
   timestamp: {
-    fontFamily: 'Geist',
     fontSize: 12,
-    color: '#6B707B',
+    color: '#8E8E93',
     marginTop: 4,
-    textAlign: 'right',
   },
   myTimestamp: {
     alignSelf: 'flex-end',
+    marginRight: 4,
   },
   otherTimestamp: {
-    alignSelf: 'flex-end',
+    alignSelf: 'flex-start',
+    marginLeft: 40,
   },
   inputContainer: {
-    paddingTop: 12,
-    backgroundColor: '#FDFDFD',
-    borderTopWidth: 1,
-    borderTopColor: '#EAEBEC',
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    borderTopWidth: 0.5,
+    borderTopColor: '#C6C6C8',
   },
   inputBox: {
     flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#EAEBEC',
-    borderRadius: 16,
-    padding: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.12,
-    shadowRadius: 4,
-    elevation: 3,
-    minHeight: 55,
+    alignItems: 'flex-end',
+    backgroundColor: '#F2F2F7',
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    minHeight: 40,
   },
-  inputLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    gap: 4,
+  addButton: {
+    marginRight: 8,
+    padding: 4,
   },
   textInput: {
     flex: 1,
-    fontFamily: 'Geist',
     fontSize: 16,
-    color: '#6B707B',
-    paddingVertical: 8,
+    color: '#000000',
+    paddingVertical: 4,
     paddingHorizontal: 4,
-    maxHeight: 120,
+    maxHeight: 100,
+    textAlignVertical: 'center',
   },
-  inputRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
+  micButton: {
+    marginLeft: 8,
+    padding: 4,
   },
   sendButton: {
-    backgroundColor: '#84A6DB',
-    borderRadius: 12,
-    padding: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#007AFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 8,
   },
 });
 
