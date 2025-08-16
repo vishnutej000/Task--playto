@@ -73,7 +73,7 @@ const statusBarStyles = StyleSheet.create({
   statusBar: {
     width: '100%',
     height: 48,
-    backgroundColor: '#FDFDFD',
+    backgroundColor: 'transparent',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -302,6 +302,9 @@ export default function ChatScreen({ navigation }: ChatScreenProps): React.JSX.E
   
   // Responsive padding - Figma uses 24px
   const responsivePadding = 24;
+
+  // Cap top inset used for header spacing to avoid too much empty space from notification/status bar
+  const headerTopInset = Math.min(insets.top || 0, 20);
   
   // Filter chats based on active tab
   const filteredChats = chatData.filter(chat => {
@@ -349,18 +352,18 @@ export default function ChatScreen({ navigation }: ChatScreenProps): React.JSX.E
       {/* Android Status Bar */}
       {isAndroid && (
         <StatusBar 
-          backgroundColor="#FDFDFD" 
+          backgroundColor="transparent" 
           barStyle="dark-content" 
-          translucent={false}
+          translucent={true}
         />
       )}
       
-      <SafeAreaView style={[styles.safeArea, { paddingTop: isIOS ? 48 : 0 }]}>
+  <SafeAreaView style={[styles.safeArea, { paddingTop: headerTopInset }]}>
         {/* Frame 11577 - Main Content Container */}
         <View style={styles.mainContent}>
           {/* Header Section */}
-          <View style={styles.headerSection}>
-            <View style={styles.headerContainer}>
+          <View style={[styles.headerSection, { paddingTop: headerTopInset ? 0 : 12 }] }>
+            <View style={[styles.headerContainer, { paddingTop: 0, paddingBottom: 8 }]}>
               <Text style={styles.headerTitle}>Chat</Text>
             </View>
           </View>
@@ -447,7 +450,7 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 8,
     gap: 12,
-    backgroundColor: '#FDFDFD',
+  backgroundColor: 'transparent',
   },
   // Header Section
   headerSection: {

@@ -15,6 +15,10 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import Feather from 'react-native-vector-icons/Feather';
+import Svg, { Path, Rect } from 'react-native-svg';
 
 type MessageType = 'text' | 'image' | 'video' | 'audio' | 'file' | 'call';
 type SenderType = 'me' | 'other';
@@ -112,7 +116,31 @@ interface ChatConversationScreenProps {
   route: any;
 }
 
+// Custom SVG Mic Icon Component
+const CustomMicIcon = ({ size = 20, color = "#007AFF" }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path d="M12 19v3" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <Path d="M19 10v2a7 7 0 0 1-14 0v-2" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <Rect x="9" y="2" width="6" height="13" rx="3" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </Svg>
+);
+
+// Custom SVG Send Icon Component
+const CustomSendIcon = ({ size = 18, color = "#FFFFFF" }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path 
+      d="m7.4 6.32 8.49-2.83c3.81-1.27 5.88.81 4.62 4.62l-2.83 8.49c-1.9 5.71-5.02 5.71-6.92 0l-.84-2.52-2.52-.84c-5.71-1.9-5.71-5.01 0-6.92ZM10.11 13.65l3.58-3.59" 
+      stroke={color} 
+      strokeWidth="1.5" 
+      strokeLinecap="round" 
+      strokeLinejoin="round" 
+    />
+  </Svg>
+);
+
 const ChatConversationScreen = ({ navigation, route }: ChatConversationScreenProps) => {
+  const HEADER_HEIGHT = 64;
+  const [headerTransparent, setHeaderTransparent] = useState(false);
   const [messageText, setMessageText] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const insets = useSafeAreaInsets();
@@ -129,11 +157,16 @@ const ChatConversationScreen = ({ navigation, route }: ChatConversationScreenPro
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop&crop=face'
   };
 
+  // Limit the top safe-area inset used for header spacing so we don't create too much empty space
+  const topInset = Math.min(insets.top || 0, 20);
+
   useEffect(() => {
     // Set status bar style
     StatusBar.setBarStyle('dark-content', true);
     if (Platform.OS === 'android') {
-      StatusBar.setBackgroundColor('#FFFFFF', true);
+  // Make Android status bar translucent and transparent so header can be transparent
+  StatusBar.setBackgroundColor('transparent', true);
+  StatusBar.setTranslucent && StatusBar.setTranslucent(true);
     }
   }, []);
 
@@ -150,10 +183,9 @@ const ChatConversationScreen = ({ navigation, route }: ChatConversationScreenPro
   };
 
   const renderMessage = ({ item }: { item: Message }) => {
-    const isMe = item.sender === 'me';
-    const maxBubbleWidth = screenWidth * 0.75;
-
-    return (
+  const isMe = item.sender === 'me';
+    // Make file messages wider horizontally than regular text bubbles
+    const maxBubbleWidth = screenWidth * (item.type === 'file' ? 0.95 : 0.75);    return (
       <View style={styles.messageWrapper}>
         <View style={[styles.messageContainer, isMe ? styles.myMessage : styles.otherMessage]}>
           {!isMe && (
@@ -231,22 +263,19 @@ const ChatConversationScreen = ({ navigation, route }: ChatConversationScreenPro
 
             {item.type === 'file' && (
               <View>
-                <View style={[styles.fileContainer, isMe ? styles.myFileContainer : styles.otherFileContainer]}>
-                  <View style={styles.fileIconContainer}>
-                    <Icon name="document-attach" size={20} color="#007AFF" />
+                {/* White file card embedded inside the blue bubble */}
+                <View style={styles.fileCardEmbedded}>
+                  <View style={styles.fileCardIcon}>
+                    <Icon name="attach" size={18} color="#007AFF" />
                   </View>
-                  <View style={styles.fileInfo}>
-                    <Text style={styles.fileName}>File Name</Text>
-                    <Text style={styles.fileDetails}>
-                      {item.fileSize} | {item.fileType}
-                    </Text>
+                  <View style={styles.fileCardText}>
+                    <Text numberOfLines={1} style={styles.fileCardTitle}>File Name</Text>
+                    <Text style={styles.fileCardMeta}>{item.fileSize} | {item.fileType}</Text>
                   </View>
                 </View>
-                {item.content && (
-                  <Text style={[styles.messageText, isMe ? styles.myMessageText : styles.otherMessageText, { marginTop: 8 }]}>
-                    {item.content}
-                  </Text>
-                )}
+                
+                {/* Blue text below the white card */}
+                <Text style={styles.fileMessageText}>{item.content || 'This is the file you wanted'}</Text>
               </View>
             )}
 
@@ -283,11 +312,11 @@ const ChatConversationScreen = ({ navigation, route }: ChatConversationScreenPro
       behavior={isIOS ? 'padding' : 'height'}
       keyboardVerticalOffset={isIOS ? 0 : 20}
     >
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" translucent={false} />
+  <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent={true} />
 
-      <SafeAreaView style={styles.safeArea}>
-        {/* Header */}
-        <View style={styles.header}>
+      <SafeAreaView style={[styles.safeArea, { paddingTop: 0 }]}>
+        {/* Header (absolute so it's visually transparent over messages) */}
+  <View style={[styles.header, { top: topInset, height: HEADER_HEIGHT, backgroundColor: headerTransparent ? 'transparent' : '#FFFFFF' }]}>
           <View style={styles.headerLeft}>
             <TouchableOpacity
               onPress={() => navigation.goBack()}
@@ -323,13 +352,19 @@ const ChatConversationScreen = ({ navigation, route }: ChatConversationScreenPro
           </View>
         </View>
 
-        {/* Messages */}
+        {/* Messages - pad the top so content is visible under the absolute header */}
         <ScrollView
           ref={scrollViewRef}
           style={styles.messagesContainer}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.messagesContent}
+          contentContainerStyle={[styles.messagesContent, { paddingTop: HEADER_HEIGHT + topInset + 8 }]}
           onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
+          onScroll={(e) => {
+            const y = e.nativeEvent.contentOffset.y;
+            // turn header transparent when content is scrolled at all
+            setHeaderTransparent(y > 0);
+          }}
+          scrollEventThrottle={16}
         >
           {messages.map((item) => (
             <React.Fragment key={item.id}>
@@ -341,8 +376,13 @@ const ChatConversationScreen = ({ navigation, route }: ChatConversationScreenPro
         {/* Input Area */}
         <View style={[styles.inputContainer, { paddingBottom: isIOS ? insets.bottom + 8 : 16 }]}>
           <View style={styles.inputBox}>
-            <TouchableOpacity style={styles.addButton}>
-              <Icon name="add" size={22} color="#007AFF" />
+            <TouchableOpacity
+              style={styles.addButton}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+              accessibilityRole="button"
+              accessibilityLabel="Add attachment"
+            >
+              <Icon name="add" size={24} color="#007AFF" />
             </TouchableOpacity>
 
             <TextInput
@@ -359,11 +399,11 @@ const ChatConversationScreen = ({ navigation, route }: ChatConversationScreenPro
               style={styles.micButton}
               onPress={toggleRecording}
             >
-              <Icon
-                name={isRecording ? "stop" : "mic"}
-                size={20}
-                color="#007AFF"
-              />
+              {isRecording ? (
+                <Feather name="square" size={24} color="#007AFF" />
+              ) : (
+                <CustomMicIcon size={24} color="#007AFF" />
+              )}
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -371,7 +411,7 @@ const ChatConversationScreen = ({ navigation, route }: ChatConversationScreenPro
               onPress={handleSendMessage}
               disabled={!messageText.trim()}
             >
-              <Icon name="send" size={18} color="#FFFFFF" />
+              <CustomSendIcon size={20} color="#FFFFFF" />
             </TouchableOpacity>
           </View>
         </View>
@@ -387,17 +427,21 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+  backgroundColor: 'transparent',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#C6C6C8',
+  position: 'absolute',
+  left: 0,
+  right: 0,
+  paddingVertical: 12,
+  // keep header visually flat: no shadow or border
+  backgroundColor: 'rgba(255,255,255,0.0)',
+  borderBottomWidth: 0,
+  zIndex: 999,
+  elevation: 999,
   },
   headerLeft: {
     flexDirection: 'row',
@@ -429,7 +473,7 @@ const styles = StyleSheet.create({
   },
   messagesContainer: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+  backgroundColor: 'transparent',
   },
   messagesContent: {
     paddingHorizontal: 16,
@@ -467,13 +511,13 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   myBubble: {
-    backgroundColor: '#007AFF',
-    borderBottomRightRadius: 6,
+  backgroundColor: '#E9E9EB',
+  borderBottomRightRadius: 6,
     alignSelf: 'flex-end',
   },
   otherBubble: {
-    backgroundColor: '#E9E9EB',
-    borderBottomLeftRadius: 6,
+  backgroundColor: '#007AFF',
+  borderBottomLeftRadius: 6,
     alignSelf: 'flex-start',
   },
   messageText: {
@@ -481,10 +525,10 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   myMessageText: {
-    color: '#FFFFFF',
+  color: '#000000',
   },
   otherMessageText: {
-    color: '#000000',
+  color: '#FFFFFF',
   },
   messageImage: {
     borderRadius: 12,
@@ -647,9 +691,68 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     minHeight: 40,
   },
+  fileStackContainer: {
+    width: '100%',
+    marginTop: 4,
+  },
+  fileCardEmbedded: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  fileCardContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 12,
+    // give a subtle outline similar to the screenshot
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.06)',
+    marginBottom: 6,
+    width: '100%',
+  },
+  fileCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  fileCardIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    backgroundColor: '#F2F2F7',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  fileCardText: {
+    flex: 1,
+  },
+  fileCardTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#000000',
+  },
+  fileCardMeta: {
+    fontSize: 13,
+    color: '#8E8E93',
+    marginTop: 2,
+  },
+  fileMessageBubble: {
+    backgroundColor: '#007AFF',
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    width: '100%',
+  },
+  fileMessageText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+  },
   addButton: {
-    marginRight: 8,
-    padding: 4,
+  marginRight: 8,
+  padding: 8,
   },
   textInput: {
     flex: 1,
@@ -661,13 +764,13 @@ const styles = StyleSheet.create({
     textAlignVertical: 'center',
   },
   micButton: {
-    marginLeft: 8,
-    padding: 4,
+  marginLeft: 8,
+  padding: 8,
   },
   sendButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+  width: 40,
+  height: 40,
+  borderRadius: 20,
     backgroundColor: '#007AFF',
     justifyContent: 'center',
     alignItems: 'center',
